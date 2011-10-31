@@ -1,4 +1,4 @@
-#include "QuectelM10.h"  
+#include "TeltonikaTM1Q.h"  
 #include "Streaming.h"
 
 #define _GSM_CONNECTION_TOUT_ 5
@@ -7,13 +7,13 @@
 
 #define RESETPIN 7
 
-QuectelM10 gsm;
+TeltonikaTM1Q gsm;
 
-QuectelM10::QuectelM10(){};
+TeltonikaTM1Q::TeltonikaTM1Q(){};
 
-QuectelM10::~QuectelM10(){};
+TeltonikaTM1Q::~TeltonikaTM1Q(){};
   
-int QuectelM10::restart(char* pin)
+int TeltonikaTM1Q::restart(char* pin)
 {
   pinMode(RESETPIN, OUTPUT);
   digitalWrite(RESETPIN, HIGH);
@@ -24,7 +24,7 @@ int QuectelM10::restart(char* pin)
   return configandwait(pin);
 }
 
-int QuectelM10::start(char* pin)
+int TeltonikaTM1Q::start(char* pin)
 {
 
   _tf.setTimeout(_TCP_CONNECTION_TOUT_);
@@ -47,7 +47,7 @@ int QuectelM10::start(char* pin)
   return configandwait(pin);
 }
 
-int QuectelM10::configandwait(char* pin)
+int TeltonikaTM1Q::configandwait(char* pin)
 {
   int connCode;
   _tf.setTimeout(_GSM_CONNECTION_TOUT_);
@@ -83,7 +83,7 @@ int QuectelM10::configandwait(char* pin)
   return 0;
 }
 
-int QuectelM10::shutdown()
+int TeltonikaTM1Q::shutdown()
 {
   pinMode(RESETPIN, OUTPUT);
   digitalWrite(RESETPIN, HIGH);
@@ -105,7 +105,7 @@ int QuectelM10::shutdown()
    return 0;
 }     
   
-int QuectelM10::sendSMS(const char* to, const char* msg)
+int TeltonikaTM1Q::sendSMS(const char* to, const char* msg)
 {
 
   //Status = READY or ATTACHED.
@@ -132,7 +132,7 @@ int QuectelM10::sendSMS(const char* to, const char* msg)
     return 1;
 }
 
-int QuectelM10::attachGPRS(char* domain, char* dom1, char* dom2)
+int TeltonikaTM1Q::attachGPRS(char* domain, char* dom1, char* dom2)
 {
 	
    //Status = READY.
@@ -222,7 +222,7 @@ int QuectelM10::attachGPRS(char* domain, char* dom1, char* dom2)
   }
 }
 
-int QuectelM10::dettachGPRS()
+int TeltonikaTM1Q::dettachGPRS()
 {
   if (getStatus()==IDLE) return 0;
    
@@ -251,7 +251,7 @@ int QuectelM10::dettachGPRS()
   return 1;
 }
 
-int QuectelM10::connectTCP(const char* server, int port)
+int TeltonikaTM1Q::connectTCP(const char* server, int port)
 {
   _tf.setTimeout(_TCP_CONNECTION_TOUT_);
 
@@ -275,7 +275,7 @@ int QuectelM10::connectTCP(const char* server, int port)
     return 0;
 }
 
-int QuectelM10::disconnectTCP()
+int TeltonikaTM1Q::disconnectTCP()
 {
   //Status = TCPCONNECTEDCLIENT or TCPCONNECTEDSERVER.
   if ((getStatus()!=TCPCONNECTEDCLIENT)&&(getStatus()!=TCPCONNECTEDSERVER))
@@ -313,7 +313,7 @@ int QuectelM10::disconnectTCP()
     return 1;
 }
 
-int QuectelM10::connectTCPServer(int port)
+int TeltonikaTM1Q::connectTCPServer(int port)
 {
   if (getStatus()!=ATTACHED)
      return 0;
@@ -345,7 +345,7 @@ int QuectelM10::connectTCPServer(int port)
     return 0;
 }
 
-boolean QuectelM10::connectedClient()
+boolean TeltonikaTM1Q::connectedClient()
 {
   if (getStatus()!=TCPSERVERWAIT)
      return 0;
@@ -362,7 +362,7 @@ boolean QuectelM10::connectedClient()
     return false;
  }
 
-int QuectelM10::write(const uint8_t* buffer, size_t sz)
+int TeltonikaTM1Q::write(const uint8_t* buffer, size_t sz)
 {
    if((getStatus() != TCPCONNECTEDSERVER)&&(getStatus() != TCPCONNECTEDCLIENT))
     return 0;
@@ -387,7 +387,7 @@ int QuectelM10::write(const uint8_t* buffer, size_t sz)
 }
 
 
-int QuectelM10::read(char* result, int resultlength)
+int TeltonikaTM1Q::read(char* result, int resultlength)
 {
   // Or maybe do it with AT+QIRD
 
@@ -409,7 +409,7 @@ int QuectelM10::read(char* result, int resultlength)
   return charget;
 }
 
- int QuectelM10::readCellData(int &mcc, int &mnc, long &lac, long &cellid)
+ int TeltonikaTM1Q::readCellData(int &mcc, int &mnc, long &lac, long &cellid)
 {
   if (getStatus()==IDLE)
     return 0;
@@ -433,7 +433,7 @@ int QuectelM10::read(char* result, int resultlength)
 }
 
 
-boolean QuectelM10::readSMS(char* msg, int msglength, char* number, int nlength)
+boolean TeltonikaTM1Q::readSMS(char* msg, int msglength, char* number, int nlength)
 {
   long index;
 
@@ -456,7 +456,7 @@ boolean QuectelM10::readSMS(char* msg, int msglength, char* number, int nlength)
 };
 
 
-boolean QuectelM10::readCall(char* number, int nlength)
+boolean TeltonikaTM1Q::readCall(char* number, int nlength)
 {
   int index;
 
@@ -476,7 +476,7 @@ boolean QuectelM10::readCall(char* number, int nlength)
   return false;
 };
 
-boolean QuectelM10::call(char* number, unsigned int milliseconds)
+boolean TeltonikaTM1Q::call(char* number, unsigned int milliseconds)
 { 
   if (getStatus()==IDLE)
     return false;
@@ -491,7 +491,7 @@ boolean QuectelM10::call(char* number, unsigned int milliseconds)
  
 }
 
-int QuectelM10::setPIN(char *pin)
+int TeltonikaTM1Q::setPIN(char *pin)
 {
   //Status = READY or ATTACHED.
   if((getStatus() != IDLE))
@@ -511,7 +511,7 @@ int QuectelM10::setPIN(char *pin)
     return 1;
 }
 
-int QuectelM10::write(uint8_t c)
+int TeltonikaTM1Q::write(uint8_t c)
 {
   if ((getStatus() == TCPCONNECTEDCLIENT) ||(getStatus() == TCPCONNECTEDSERVER) )
     return write(&c, 1);
@@ -519,7 +519,7 @@ int QuectelM10::write(uint8_t c)
     return 0;
 }
 
-int QuectelM10::write(const char* str)
+int TeltonikaTM1Q::write(const char* str)
 {
   if ((getStatus() == TCPCONNECTEDCLIENT) ||(getStatus() == TCPCONNECTEDSERVER) )
       return write((const uint8_t*)str, strlen(str));
@@ -527,7 +527,7 @@ int QuectelM10::write(const char* str)
       return 0;
 }
 
-int QuectelM10::changeNSIPmode(char mode) ///SYVV
+int TeltonikaTM1Q::changeNSIPmode(char mode) ///SYVV
 {
     _tf.setTimeout(_TCP_CONNECTION_TOUT_);
     
@@ -543,7 +543,7 @@ int QuectelM10::changeNSIPmode(char mode) ///SYVV
     return 1;
 }
 
-int QuectelM10::getCCI(char *cci)
+int TeltonikaTM1Q::getCCI(char *cci)
 {
   //Status must be READY
   if((getStatus() != READY))
@@ -566,7 +566,7 @@ int QuectelM10::getCCI(char *cci)
     return 1;
 }
   
-int QuectelM10::getIMEI(char *imei)
+int TeltonikaTM1Q::getIMEI(char *imei)
 {
       
   _tf.setTimeout(_GSM_DATA_TOUT_);	//Timeout for expecting modem responses.
@@ -586,7 +586,7 @@ int QuectelM10::getIMEI(char *imei)
     return 1;
 }
 
-uint8_t QuectelM10::read()
+uint8_t TeltonikaTM1Q::read()
 {
   return _cell.read();
 }

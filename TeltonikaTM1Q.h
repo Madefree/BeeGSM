@@ -1,9 +1,9 @@
-#ifndef QUECTELM10_H
-#define QUECTELM10_H
+#ifndef TELTONIKATM1Q_H
+#define TELTONIKATM1Q_H
 #include <NewSoftSerial.h>
 #include "GSM.h"
 
-class QuectelM10 : public virtual GSM
+class TeltonikaTM1Q : public virtual GSM
 {
 
   private:
@@ -12,8 +12,8 @@ class QuectelM10 : public virtual GSM
     int changeNSIPmode(char);
 
   public:
-    QuectelM10();
-    ~QuectelM10();
+    TeltonikaTM1Q();
+    ~TeltonikaTM1Q();
     int start(char* pin=0);
     int restart(char* pin=0);
     int shutdown();
@@ -40,7 +40,7 @@ class QuectelM10 : public virtual GSM
   
 };
 
-extern QuectelM10 gsm;
+extern TeltonikaTM1Q gsm;
 
 #endif
 

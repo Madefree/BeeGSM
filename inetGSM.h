@@ -3,7 +3,7 @@
 
 #define BUFFERSIZE 200
 
-#include "QuectelM10.h"
+#include "TeltonikaTM1Q.h"
 
 class InetGSM
 {
