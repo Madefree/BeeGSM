@@ -476,6 +476,34 @@ boolean TeltonikaTM1Q::readCall(char* number, int nlength)
   return false;
 };
 
+
+int TeltonikaTM1Q::readCallListNumbers(char* numbersList[], int nlength)
+ {
+ int index;
+ char number[50];
+ int value=-1;	 
+ 
+ if (getStatus()==IDLE)
+ return value;
+ 
+ _tf.setTimeout(_GSM_DATA_TOUT_);
+ 
+ if(_tf.find("+CLIP: \""))
+ {
+ _tf.getString("", "\"", number, 50);
+ _cell << "ATH" << endl;
+ delay(1000);
+ _cell.flush();
+ for (int i=0; i<nlength; i++) {
+	 if(strcmp(numbersList[i],number)==0) {
+		value=i;
+		break;
+	 }
+  }
+ };
+ return value;
+ };
+
 boolean TeltonikaTM1Q::call(char* number, unsigned int milliseconds)
 { 
   if (getStatus()==IDLE)

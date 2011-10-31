@@ -24,6 +24,7 @@ class TeltonikaTM1Q : public virtual GSM
     int attachGPRS(char* domain, char* dom1, char* dom2);
     boolean readSMS(char* msg, int msglength, char* number, int nlength);
     boolean readCall(char* number, int nlength);
+	int readCallListNumbers(char* numbersList[], int nlength);
     boolean call(char* number, unsigned int milliseconds);
     int dettachGPRS();
     int connectTCP(const char* server, int port);
