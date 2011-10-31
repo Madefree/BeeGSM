@@ -69,10 +69,10 @@ int TeltonikaTM1Q::configandwait(char* pin)
 		  setStatus(READY);
 		  
 		_cell << "AT+CMGF=1" <<  _BYTE(cr) << endl; //SMS text mode.
-		delay(200);
+		delay(400);
 		  // Buah, we should take this to readCall()
 		_cell << "AT+CLIP=1" <<  _BYTE(cr) << endl; //SMS text mode.
-		delay(200);
+		delay(400);
 		//_cell << "AT+QIDEACT" <<  _BYTE(cr) << endl; //To make sure not pending connection.
 		//delay(1000);
 	  
@@ -123,7 +123,7 @@ int TeltonikaTM1Q::sendSMS(const char* to, const char* msg)
   if(!_tf.find(">")) return 0;
 
   //SMS text.
-  _cell << msg << _BYTE(ctrlz) << _BYTE(cr) << endl; 
+  _cell << msg << '\x1a';
 
   //Expect "OK".
   if(!_tf.find("OK"))
@@ -469,7 +469,7 @@ boolean TeltonikaTM1Q::readCall(char* number, int nlength)
   {
     _tf.getString("", "\"", number, nlength);
     _cell << "ATH" << endl;
-    delay(1000);
+    delay(500);
     _cell.flush();
     return true;
   };
