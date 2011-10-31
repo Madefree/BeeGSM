@@ -5,7 +5,7 @@
 #define _TCP_CONNECTION_TOUT_ 20
 #define _GSM_DATA_TOUT_ 5
 
-#define RESETPIN 7
+#define RESETPIN 4
 
 TeltonikaTM1Q gsm;
 

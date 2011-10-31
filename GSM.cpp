@@ -1,20 +1,23 @@
 #include "GSM.h"
 #include "WideTextFinder.h"
 
-#define _GSM_TXPIN_ 2
-#define _GSM_RXPIN_ 3
+
+#define _GSM_TXPIN_ 7
+#define _GSM_RXPIN_ 8
+
 
 GSM::GSM():_cell(_GSM_TXPIN_,_GSM_RXPIN_),_tf(_cell, 10),_status(IDLE)
 {
-  
+	
 };
-
 
 int GSM::begin(char* pin)
 {
+
   _cell.begin(9600);
   setStatus(IDLE);
   return start(pin);
+	
 }
 
 int GSM::restart(char* pin){ return 1;}
