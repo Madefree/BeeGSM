@@ -5,7 +5,8 @@
 #define _TCP_CONNECTION_TOUT_ 20
 #define _GSM_DATA_TOUT_ 5
 
-#define RESETPIN 4
+//#define RESETPIN 4
+#undef RESETPIN
 
 TeltonikaTM1Q gsm;
 
@@ -15,11 +16,13 @@ TeltonikaTM1Q::~TeltonikaTM1Q(){};
   
 int TeltonikaTM1Q::restart(char* pin)
 {
+#ifdef RESETPIN
   pinMode(RESETPIN, OUTPUT);
   digitalWrite(RESETPIN, HIGH);
   delay(10000);
   digitalWrite(RESETPIN, LOW);
   delay(1000);
+#endif
 
   return configandwait(pin);
 }
@@ -38,11 +41,13 @@ int TeltonikaTM1Q::start(char* pin)
 //     return 0;
 //   }
 
+#ifdef RESETPIN
   pinMode(RESETPIN, OUTPUT);
   digitalWrite(RESETPIN, HIGH);
   delay(10000);
   digitalWrite(RESETPIN, LOW);
   delay(1000);
+#endif
 
   return configandwait(pin);
 }
@@ -85,11 +90,13 @@ int TeltonikaTM1Q::configandwait(char* pin)
 
 int TeltonikaTM1Q::shutdown()
 {
+#ifdef RESETPIN
   pinMode(RESETPIN, OUTPUT);
   digitalWrite(RESETPIN, HIGH);
   delay(800);
   digitalWrite(RESETPIN, LOW);
   delay(1000);
+#endif
 
   _tf.setTimeout(_TCP_CONNECTION_TOUT_);
   _cell.flush();
@@ -442,7 +449,7 @@ boolean TeltonikaTM1Q::readSMS(char* msg, int msglength, char* number, int nleng
   
   _tf.setTimeout(_GSM_DATA_TOUT_);
   _cell.flush();
-  _cell << "AT+CMGL=\"REC UNREAD\",1" << endl;
+  _cell << "AT+CMGL=\"REC UNREAD\"" << endl;
   if(_tf.find("+CMGL: "))
   {
     index=_tf.getValue();
