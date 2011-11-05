@@ -99,7 +99,7 @@ int TeltonikaTM1Q::configandwait(char* pin)
 		  // Buah, we should take this to readCall()
 		_cell << "AT+CLIP=1" <<  _BYTE(cr) << endl; //SMS text mode.
 		delay(400);
-		//_cell << "AT+QIDEACT" <<  _BYTE(cr) << endl; //To make sure not pending connection.
+		//_cell << "AT+CGACT=0" <<  _BYTE(cr) << endl; //PDP context deactivate to make sure not pending connection.
 		//delay(1000);
 	  
 		  return 1;
@@ -121,7 +121,7 @@ int TeltonikaTM1Q::shutdown()
 
   _tf.setTimeout(_TCP_CONNECTION_TOUT_);
   _cell.flush();
-  _cell << "AT+CFUN=4" <<  _BYTE(cr) << endl; //Comprobar
+  _cell << "AT+CPWROFF" <<  _BYTE(cr) << endl; //Comprobar
    if (_tf.find("OK")) 
    {
      setStatus(IDLE);
@@ -151,7 +151,7 @@ int TeltonikaTM1Q::sendSMS(const char* to, const char* msg)
   if(!_tf.find(">")) return 0;
 
   //SMS text.
-  _cell << msg << '\x1a';
+  _cell << msg << _BYTE(ctrlz) << _BYTE(cr) << endl;
 
   //Expect "OK".
   if(!_tf.find("OK"))
@@ -179,74 +179,53 @@ int TeltonikaTM1Q::attachGPRS(char* domain, char* dom1, char* dom2)
 
   delay(500);
   
-  //Set the context 0 as FGCNT.
-  _cell << "AT+QIFGCNT=0" <<  _BYTE(cr) << endl;
+  //Set 0 as PDP context.
+  _cell << "AT+CGDCONT=0" <<  _BYTE(cr) << endl;
   
   //Expect "OK".
   if(!_tf.find("OK")) return 0;
 
   delay(200);
 
-  //Set bearer type as GPRS, APN, user name and pasword. 
-  _cell << "AT+QICSGP=1,\""<< domain << "\",\""<< dom1 << "\",\"" << dom2 << "\"" << _BYTE(cr) << endl;	
+  //Set APN parameter for the GPRS profile 0.
+  _cell << "AT+NPSD=0,1,\""<< domain << "\"" << _BYTE(cr) << endl;
+  
+  //Expect "OK".
+  if(!_tf.find("OK")) return 0;
+  
+  delay(200);
+
+  //Set Username parameter for GPRS profile 0
+  _cell << "AT+NPSD=0,2,\""<< dom1 << "\"" << _BYTE(cr) << endl;
+  
+  //Expect "OK".
+  if(!_tf.find("OK")) return 0;
+  
+  delay(200);
+
+  //Set Password parameter for GPRS profile 0
+  _cell << "AT+NPSD=0,3,\""<< dom2 << "\"" << _BYTE(cr) << endl;
 
   //Expect "OK".
   if(!_tf.find("OK")) return 0;
 
   delay(200);
   
-  //Disable the function of MUXIP.
-  _cell << "AT+QIMUX=0" <<  _BYTE(cr) << endl;
-  
-  //Expect "OK". ATTENTION, RETURNS ERROR BUT IT DOES NOT MATTER!!!!
-  if(!_tf.find("OK")) ;//return 0;
-
-  delay(200);
-
-  //Set the session mode as transparent.
-  _cell << "AT+QIMODE=1" <<  _BYTE(cr) << endl;
-  
-  //Expect "OK". ATTENTION, RETURNS ERROR BUT IT DOES NOT MATTER!!!!
-  if(!_tf.find("OK")) ;//return 0;
-
-  delay(200);	
-
-  //Use domain name as the address to stablish a TCP session.
-   _cell << "AT+QIDNSIP=1" <<  _BYTE(cr) << endl;
- // _cell << "AT+QIDNSIP=0" <<  _BYTE(cr) << endl;
-  
-  //Expect "OK". ATTENTION, RETURNS ERROR BUT IT DOES NOT MATTER!!!!
-  if(!_tf.find("OK")) ;//return 0;
-
-  delay(200);	
-  
-  //Register the TCP/IP stack.
-  _cell << "AT+QIREGAPP" <<  _BYTE(cr) << endl;
-  
-  //Expect "OK". ATTENTION, RETURNS ERROR BUT IT DOES NOT MATTER!!!!
-  if(!_tf.find("OK")) ;//return 0;
-  
-  delay(200);	
-  
-  //Activate FGCNT.
-  _cell << "AT+QIACT" <<  _BYTE(cr) << endl;
+  //Activate GPRS profile 0.
+  _cell << "AT+NPSDA=0,3" <<  _BYTE(cr) << endl;
 
   //Expect "OK". 
   if(_tf.find("OK"))
   {
-    setStatus(ATTACHED); 
+    setStatus(ATTACHED);
     delay(1000);
     return 1;
   }
   else
   {
-    //setStatus(ATTACHED); 
-    //delay(1000);
-    //return 1;
-
     // In this case we dont know the modem mental position
     setStatus(ERROR);
-    return 0;   
+    return 0;
   }
 }
 
@@ -258,22 +237,15 @@ int TeltonikaTM1Q::dettachGPRS()
 
   _cell.flush();
 
-  //GPRS dettachment.
-  _cell << "AT+CGATT=0" <<  _BYTE(cr) << endl;
+  //Deactivate GPRS profile 0.
+  _cell << "AT+NPSDA=0,4" <<  _BYTE(cr) << endl;
   
-  if(!_tf.find("OK")) 
+  if(!_tf.find("OK"))
   {
     setStatus(ERROR);
     return 0;
   }
   delay(500);
-  
-  // Commented in initial trial code!!
-  //Stop IP stack.
-  //_cell << "AT+WIPCFG=0" <<  _BYTE(cr) << endl;
-  //	if(!_tf.find("OK")) return 0;
-  //Close GPRS bearer.
-  //_cell << "AT+WIPBR=0,6" <<  _BYTE(cr) << endl;
 
   setStatus(READY);
   return 1;
@@ -289,11 +261,17 @@ int TeltonikaTM1Q::connectTCP(const char* server, int port)
 
   _cell.flush();
   
-  //Visit the remote TCP server.
-  _cell << "AT+QIOPEN=\"TCP\",\"" << server << "\"," << port <<  _BYTE(cr) << endl;
+  //Create a socket and associate it to TCP protocol.
+  _cell << "AT+NSOCR=6" <<  _BYTE(cr) << endl;
   
-   //Expect "CONNECT". 
-  if(_tf.find("CONNECT"))
+  //Expect "OK".
+  if(!_tf.find("OK")) return 0;
+  
+  //Visit the remote TCP server.
+  _cell << "AT+NSOCO=0,\"" << server << "\"," << port <<  _BYTE(cr) << endl;
+  
+   //Expect "OK". 
+  if(_tf.find("OK"))
   {
     setStatus(TCPCONNECTEDCLIENT); 
     delay(200);
@@ -314,13 +292,13 @@ int TeltonikaTM1Q::disconnectTCP()
 
   _cell.flush();
 
-  //Switch to AT mode.
-  _cell << "+++" << endl;
-  
+  //Close socket 0.
+  _cell << "AT+NSOCL=0" <<  _BYTE(cr) << endl;
+
+  //Expect "OK".
+  if(!_tf.find("OK")) return 0;
+
   delay(200);
-  
-  //Close TCP client and deact.
-  _cell << "AT+QICLOSE" << endl;
 
   //If remote server close connection AT+QICLOSE generate ERROR
   /*if(_tf.find("OK"))
@@ -335,10 +313,10 @@ int TeltonikaTM1Q::disconnectTCP()
   
   return 0;    */
   if(getStatus()==TCPCONNECTEDCLIENT)
-      	setStatus(ATTACHED);
-   else
-        setStatus(TCPSERVERWAIT);   
-    return 1;
+      setStatus(ATTACHED);
+  else
+      setStatus(TCPSERVERWAIT);   
+  return 1;
 }
 
 int TeltonikaTM1Q::connectTCPServer(int port)
@@ -350,20 +328,13 @@ int TeltonikaTM1Q::connectTCPServer(int port)
 
   _cell.flush();
 
-  // Set port
-  _cell << "AT+QILPORT=\"TCP\"," << port << endl;
+  //Set the socket 0 in listening mode.
+  _cell << "AT+NSOLI=0," << port <<  _BYTE(cr) << endl;
   if(!_tf.find("OK")) // Should we leave Status in ERROR?
     return 0;
     
   delay(200);  
-  
-  //Read Local Port, if not read, server get error.
-  _cell << "AT+QILOCIP" << endl;
-    
-  delay(500);  
-  
-  // Open server
-  _cell << "AT+QISERVER" << endl;
+
   if(_tf.find("OK"))
   {
     setStatus(TCPSERVERWAIT);
@@ -381,7 +352,7 @@ boolean TeltonikaTM1Q::connectedClient()
   // Alternative: AT+QISTAT, although it may be necessary to call an AT 
   // command every second,which is not wise
   _tf.setTimeout(1);
-  if(_tf.find("CONNECT")) 
+  if(_tf.find("NUSOLI")) 
   {
     setStatus(TCPCONNECTEDSERVER);
     return true;
@@ -506,31 +477,31 @@ boolean TeltonikaTM1Q::readCall(char* number, int nlength)
 
 
 int TeltonikaTM1Q::readCallListNumbers(char* numbersList[], int nlength)
- {
- int index;
- char number[50];
- int value=-1;	 
- 
- if (getStatus()==IDLE)
- return value;
- 
- _tf.setTimeout(_GSM_DATA_TOUT_);
- 
- if(_tf.find("+CLIP: \""))
- {
- _tf.getString("", "\"", number, 50);
- _cell << "ATH" << endl;
- delay(1000);
- _cell.flush();
- for (int i=0; i<nlength; i++) {
-	 if(strcmp(numbersList[i],number)==0) {
-		value=i;
-		break;
-	 }
-  }
- };
- return value;
- };
+{
+  int index;
+  char number[50];
+  int value=-1;	 
+
+  if (getStatus()==IDLE)
+    return value;
+
+  _tf.setTimeout(_GSM_DATA_TOUT_);
+
+  if(_tf.find("+CLIP: \""))
+  {
+    _tf.getString("", "\"", number, 50);
+    _cell << "ATH" << endl;
+    delay(1000);
+    _cell.flush();
+    for (int i=0; i<nlength; i++) {
+      if(strcmp(numbersList[i],number)==0) {
+        value=i;
+        break;
+      }
+    }
+  };
+  return value;
+};
 
 boolean TeltonikaTM1Q::call(char* number, unsigned int milliseconds)
 { 
@@ -558,7 +529,7 @@ int TeltonikaTM1Q::setPIN(char *pin)
   _cell.flush();
 
   //AT command to set PIN.
-  _cell << "AT+CPIN=" << pin <<  _BYTE(cr) << endl; // Establecemos el pin
+  _cell << "AT+CPIN=\"" << pin << "\"" <<  _BYTE(cr) << endl; // Establecemos el pin
 
   //Expect "OK".
   if(!_tf.find("OK"))
@@ -581,22 +552,6 @@ int TeltonikaTM1Q::write(const char* str)
       return write((const uint8_t*)str, strlen(str));
   else
       return 0;
-}
-
-int TeltonikaTM1Q::changeNSIPmode(char mode) ///SYVV
-{
-    _tf.setTimeout(_TCP_CONNECTION_TOUT_);
-    
-    //if (getStatus()!=ATTACHED)
-    //    return 0;
-
-    _cell.flush();
-
-    _cell << "AT+QIDNSIP=" << mode <<  _BYTE(cr) << endl;
-
-    if(!_tf.find("OK")) return 0;
-    
-    return 1;
 }
 
 int TeltonikaTM1Q::getCCI(char *cci)
