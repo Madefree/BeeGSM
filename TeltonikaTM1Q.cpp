@@ -48,6 +48,11 @@ int TeltonikaTM1Q::restart(char* pin)
   return configandwait(pin);
 }
 
+void TeltonikaTM1Q::debug(boolean value)
+{
+  _tf.setDebug(value);
+}
+
 int TeltonikaTM1Q::start(char* pin)
 {
 
