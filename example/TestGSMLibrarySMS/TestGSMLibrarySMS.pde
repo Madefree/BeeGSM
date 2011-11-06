@@ -1,4 +1,4 @@
-#include "QuectelM10.h"
+#include "TeltonikaTM1Q.h"
 #include <NewSoftSerial.h>
 
 /*
@@ -14,13 +14,13 @@ void setup()
 {
   //Serial connection.
   Serial.begin(9600);
-  Serial.println("GSM Shield testing.");
+  Serial.println("BeeGSM testing.");
   //Start configuration.
   if (gsm.begin())
     Serial.println("\nstatus=READY");
   else Serial.println("\nstatus=IDLE");
   
-  if (gsm.sendSMS("630538546", "Arduino SMS"))
+  if (gsm.sendSMS("1234567890", "Hi Guy!"))
     Serial.println("\nSMS sent OK");
 
 };

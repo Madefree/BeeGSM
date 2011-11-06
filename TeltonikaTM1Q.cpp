@@ -156,7 +156,7 @@ int TeltonikaTM1Q::sendSMS(const char* to, const char* msg)
   if(!_tf.find(">")) return 0;
 
   //SMS text.
-  _cell << msg << _BYTE(ctrlz) << _BYTE(cr) << endl;
+  _cell << msg << _BYTE(ctrlz);
 
   //Expect "OK".
   if(!_tf.find("OK"))

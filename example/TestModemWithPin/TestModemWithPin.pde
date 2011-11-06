@@ -1,4 +1,4 @@
-#include <QuectelM10.h>
+#include <TeltonikaTM1Q.h>
 #include <NewSoftSerial.h>
 
 /*
@@ -15,7 +15,7 @@ void setup()
   int res;
   //Serial connection.
   Serial.begin(9600);
-  Serial.println("GSM Shield testing.");
+  Serial.println("BeeGSM testing.");
   //Start configuration.
   if (gsm.begin("6104"))
     Serial.println("\nstatus=READY");
