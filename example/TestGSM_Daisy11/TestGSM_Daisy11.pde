@@ -2,7 +2,7 @@
 #include "TeltonikaTM1Q.h"
 #include <NewSoftSerial.h>
 
-#define QUALIFIED_NUMBER "+393285781553"
+#define QUALIFIED_NUMBER "+391234567890"
 
 char msg[200];
 int numdata;

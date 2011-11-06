@@ -32,7 +32,7 @@ class InetGSM
     char _buffer[BUFFERSIZE];
     
   public:
-    int httpGET(const char* server, int port, const char* path, char* result, int resultlength);
+    int httpGET(const char* server, int port, const char* path, char* result);
     int httpPOST(const char* server, int port, const char* path, const char* parameters, char* result, int resultlength);
     
     // Fast and dirty solution. Should make a "mail" object. And by the moment it does not run.

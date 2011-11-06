@@ -175,7 +175,8 @@ int TeltonikaTM1Q::attachGPRS(char* domain, char* dom1, char* dom2)
   _tf.setTimeout(_GSM_DATA_TOUT_);	//Timeout for expecting modem responses.
  
   _cell.flush();
-  
+
+/*
   //Attach to GPRS service.
   _cell << "AT+CGATT=1" <<  _BYTE(cr) << endl;
   
@@ -185,13 +186,14 @@ int TeltonikaTM1Q::attachGPRS(char* domain, char* dom1, char* dom2)
   delay(500);
   
   //Set 0 as PDP context.
-  _cell << "AT+CGDCONT=0" <<  _BYTE(cr) << endl;
+  //_cell << "AT+CGDCONT=0" <<  _BYTE(cr) << endl;
   
   //Expect "OK".
   if(!_tf.find("OK")) return 0;
 
   delay(200);
-
+*/
+  
   //Set APN parameter for the GPRS profile 0.
   _cell << "AT+NPSD=0,1,\""<< domain << "\"" << _BYTE(cr) << endl;
   
@@ -357,7 +359,7 @@ boolean TeltonikaTM1Q::connectedClient()
   // Alternative: AT+QISTAT, although it may be necessary to call an AT 
   // command every second,which is not wise
   _tf.setTimeout(1);
-  if(_tf.find("NUSOLI")) 
+  if(_tf.find("NUSOLI"))
   {
     setStatus(TCPCONNECTEDSERVER);
     return true;
@@ -368,49 +370,60 @@ boolean TeltonikaTM1Q::connectedClient()
 
 int TeltonikaTM1Q::write(const uint8_t* buffer, size_t sz)
 {
-   if((getStatus() != TCPCONNECTEDSERVER)&&(getStatus() != TCPCONNECTEDCLIENT))
+  int resultlength;
+  char reslengthbuf[60];
+  
+  if((getStatus() != TCPCONNECTEDSERVER)&&(getStatus() != TCPCONNECTEDCLIENT))
     return 0;
     
-   if(sz>1460)
-     return 0;
+  if(sz>1460)
+    return 0;
   
   _tf.setTimeout(_GSM_DATA_TOUT_);
 
   _cell.flush();
-    
-  for(int i=0;i<sz;i++)
-    _cell << _BYTE(buffer[i]);
   
-  //Not response for a write.
-  /*if(_tf.find("OK"))
-    return sz;
+  //Connect the socket with handle 0 peer-to-peer to the remote end.
+  _cell << "AT+NSOWR=0," << sz <<  _BYTE(cr) << endl;
+  
+  //Write data to connected socket.
+  if(_tf.find("@"))
+  {
+    for(int i=0;i<sz;i++)
+      _cell << _BYTE(buffer[i]);
+  }
   else
-    return 0;*/
-    
-  return sz;  
+    return 0;
+  
+  // Return result length.
+  if(_tf.find("OK"))
+  {
+    _tf.getString("+NUSORD: 0,","",reslengthbuf, 60);
+    resultlength = atoi(reslengthbuf);
+    return resultlength;
+  }
+  else
+    return 0;
 }
 
 
 int TeltonikaTM1Q::read(char* result, int resultlength)
 {
-  // Or maybe do it with AT+QIRD
 
   int charget;
-  _tf.setTimeout(3);
-  // Not well. This way we read whatever comes in one second. If a CLOSED 
-  // comes, we have spent a lot of time
-    charget=_tf.getString("","",result, resultlength);
-
-  /*if(strtok(result, "CLOSED")) // whatever chain the Q10 returns...
-  {
-    // TODO: use strtok to delete from the chain everything from CLOSED
-    if(getStatus()==TCPCONNECTEDCLIENT)
-      setStatus(ATTACHED);
-    else
-      setStatus(TCPSERVERWAIT);
-  }  */
   
-  return charget;
+  _tf.setTimeout(_GSM_DATA_TOUT_);
+  
+  //Read of data from socket.
+  _cell << "AT+NSORD=0," << resultlength <<  _BYTE(cr) << endl;
+  
+  _tf.getString("","",result, resultlength);
+  
+  
+  if(_tf.find("OK"))
+    return 1;
+  else
+    return 0;
 }
 
  int TeltonikaTM1Q::readCellData(int &mcc, int &mnc, long &lac, long &cellid)
@@ -600,6 +613,24 @@ int TeltonikaTM1Q::getIMEI(char *imei)
     return 0;
   else  
     return 1;
+}
+
+int TeltonikaTM1Q::resolveDNS(const char* server,char* result)
+{
+  if(getStatus()!= ATTACHED)
+    return 0;
+  _tf.setTimeout(_GSM_DATA_TOUT_);
+  
+  _cell.flush();
+  
+  _cell << "AT+NDNSRN=0,\"" << server << "\"" << _BYTE(cr) << endl;
+  
+  if(_tf.find("+NDNSRN: "))
+  {
+    _tf.getString("\"", "\"", result, 20);
+    _tf.find("OK");
+    return 1;
+  }
 }
 
 uint8_t TeltonikaTM1Q::read()

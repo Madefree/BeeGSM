@@ -22,31 +22,44 @@
 #include "inetGSM.h"
 
 
-int InetGSM::httpGET(const char* server, int port, const char* path, char* result, int resultlength)
+int InetGSM::httpGET(const char* server, int port, const char* path, char* result)
 {
-  int length_write;
-
+  char buffer[60];
+  char ip[20];
   
   //Status = ATTACHED.
   if(gsm.getStatus()!=GSM::ATTACHED)
     return 0;
   
+  if(!gsm.resolveDNS(server,ip))
+    return 0;
     
-  if(!gsm.connectTCP(server, port))
+  if(!gsm.connectTCP(ip, port))
     return 0;
  
+  
+  strcpy(buffer,"GET ");
+  strcat(buffer,path);
+  strcat(buffer," HTTP/1.0\nHost: ");
+  strcat(buffer,server);
+  strcat(buffer,"\n\n");
+  int resultlength = gsm.write((const uint8_t*)buffer,strlen(buffer));
+  
+  /*
   gsm.write((const uint8_t*)"GET ", 4);
   gsm.write((const uint8_t*)path, strlen(path));
   gsm.write((const uint8_t*)" HTTP/1.0\nHost: ", 16);
   gsm.write((const uint8_t*)server, strlen(server));
   gsm.write((const uint8_t*)"\n\n",2);
-
+   */
   
-  int res= gsm.read(result, resultlength);
-
-  gsm.disconnectTCP();
+  if(gsm.read(result, resultlength))
+    return resultlength;
+  else
+    return 0;
   
-  return res;
+  //gsm.disconnectTCP();
+
 }
 
 int InetGSM::httpPOST(const char* server, int port, const char* path, const char* parameters, char* result, int resultlength)

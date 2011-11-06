@@ -41,6 +41,7 @@ class TeltonikaTM1Q : public virtual GSM
     int shutdown();
     int getCCI(char* cci);
     int getIMEI(char* imei);
+    int resolveDNS(const char* server,char* result);
     int sendSMS(const char* to, const char* msg);
     int attachGPRS(char* domain, char* dom1, char* dom2);
     boolean readSMS(char* msg, int msglength, char* number, int nlength);
