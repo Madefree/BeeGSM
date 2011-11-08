@@ -556,6 +556,93 @@ int TeltonikaTM1Q::setPIN(char *pin)
     return 1;
 }
 
+int TeltonikaTM1Q::phoneBookLength(int length)
+{
+  char lengthbuf[4];
+  
+  if (getStatus()==IDLE)
+    return 0;
+  
+  _tf.setTimeout(_GSM_DATA_TOUT_);
+  _cell.flush();
+  
+  //Number of indexes.
+  _cell << "AT+CPBR=?" <<  _BYTE(cr) << endl;
+  
+  if(_tf.find("+CPBR:"))
+  {
+    _tf.getString("(1-",")",lengthbuf, 4);
+    length = atoi(lengthbuf);
+    _tf.find("OK");
+    return 1;
+  }
+  else
+    return 0;
+}
+
+int TeltonikaTM1Q::readPhoneBook(int index, char* number, char* text)
+{
+  if (getStatus()==IDLE)
+    return 0;
+  
+  _tf.setTimeout(_GSM_DATA_TOUT_);
+  _cell.flush();
+  
+  //Phonebook
+  _cell << "AT+CPBR=" << index << "," << index <<  _BYTE(cr) << endl;
+  
+  if(_tf.find("+CPBR:"))
+  {
+    _tf.getString(",\"","\",",number, 20);
+    _tf.getString(",\"","\"",text, 20);
+    _tf.find("OK");
+    return 1;
+  }
+  else
+    return 0;
+}
+
+int TeltonikaTM1Q::findPhoneBook(char* findtext, int index, char* number, char* text)
+{
+  char indexbuf[20];
+  
+  if (getStatus()==IDLE)
+    return 0;
+  
+  _tf.setTimeout(_GSM_DATA_TOUT_);
+  _cell.flush();
+  
+  _cell << "AT+CPBF=\"" << findtext << "\"" <<  _BYTE(cr) << endl;
+  
+  if(_tf.find("+CPBF: "))
+  {
+    _tf.getString("",",",indexbuf, 20);
+    index = atoi(indexbuf);
+    _tf.getString("\"","\",",number, 20);
+    _tf.getString(",\"","\"",text, 20);
+    _tf.find("OK");
+    return 1;
+  }
+  else
+    return 0;
+}
+
+int TeltonikaTM1Q::writePhoneBook(char* number, char* text)
+{
+  if (getStatus()==IDLE)
+    return 0;
+  
+  _tf.setTimeout(_GSM_DATA_TOUT_);
+  _cell.flush();
+  
+  _cell << "AT+CPBW=,\"" << number << "\",,\"" << text <<  _BYTE(cr) << endl;
+  
+  if(_tf.find("OK"))
+    return 1;
+  else
+    return 0;
+}
+
 int TeltonikaTM1Q::write(uint8_t c)
 {
   if ((getStatus() == TCPCONNECTEDCLIENT) ||(getStatus() == TCPCONNECTEDSERVER) )
