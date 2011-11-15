@@ -24,7 +24,7 @@
 
 #define _GSM_CONNECTION_TOUT_ 5
 #define _TCP_CONNECTION_TOUT_ 20
-#define _GSM_DATA_TOUT_ 5
+#define _GSM_DATA_TOUT_ 10
 
 //#define RESETPIN 4
 #undef RESETPIN
@@ -482,12 +482,13 @@ boolean TeltonikaTM1Q::readCall(char* number, int nlength)
   
   _tf.setTimeout(_GSM_DATA_TOUT_);
 
-  if(_tf.find("+CLIP: \""))
+  if(_tf.find("+CLIP: "))
   {
-    _tf.getString("", "\"", number, nlength);
-    _cell << "ATH" << endl;
-    delay(500);
-    _cell.flush();
+    _tf.getString("\"", "\",", number, nlength);
+		if(_tf.find("RING"))
+			_cell << "ATH" << endl;
+    delay(1000);
+    //_cell.flush();
     return true;
   };
   return false;
@@ -556,7 +557,7 @@ int TeltonikaTM1Q::setPIN(char *pin)
     return 1;
 }
 
-int TeltonikaTM1Q::readPhoneBook(char* phonebook)
+int TeltonikaTM1Q::readAllPhoneBook(char* phonebook)
 {
   char index[2];
   char number[20];
@@ -576,13 +577,13 @@ int TeltonikaTM1Q::readPhoneBook(char* phonebook)
     _tf.getString("",",",index, 2);
     _tf.getString(",\"","\",",number, 20);
     _tf.getString(",\"","\"",text, 20);
-    strcat(phonebook, "index= ");
+    strcat(phonebook, "index=");
     strcat(phonebook, index);
-    strcat(phonebook, ", number = ");
+    strcat(phonebook, ", number=");
     strcat(phonebook, number);
-    strcat(phonebook, ", text = ");
+    strcat(phonebook, ", text=");
     strcat(phonebook, text);
-    strcat(phonebook, "/n");
+    strcat(phonebook, "; ");
   }
   
   if(_tf.find("OK"))
@@ -627,8 +628,7 @@ int TeltonikaTM1Q::findPhoneBook(char* findtext, int index, char* number, char* 
   
   if(_tf.find("+CPBF: "))
   {
-    _tf.getString("",",",indexbuf, 20);
-    index = atoi(indexbuf);
+    index=_tf.getValue();
     _tf.getString("\"","\",",number, 20);
     _tf.getString(",\"","\"",text, 20);
     _tf.find("OK");

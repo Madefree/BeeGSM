@@ -53,7 +53,7 @@ class TeltonikaTM1Q : public virtual GSM
     int disconnectTCP();
     int connectTCPServer(int port);
     boolean connectedClient();
-    int readPhoneBook(char* phonebook);
+    int readAllPhoneBook(char* phonebook);
     int readPhoneBook(int index, char* number, char* text);
     int findPhoneBook(char* findtext, int index, char* number, char* text);
     int writePhoneBook(char* number, char* text);

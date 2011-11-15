@@ -4,7 +4,7 @@
 
 #define QUALIFIED_NUMBER "+391234567890"
 
-char msg[200];
+char msg[160];
 int numdata;
 
 Daisy11 led(W3);
@@ -20,8 +20,8 @@ void setup()
     Serial.println("\nstatus=READY");
   else Serial.println("\nstatus=IDLE");
   gsm.debug(true);
-  //if (gsm.sendSMS("number_to", "Hi friend!"))
-  //  Serial.println("\nSMS sent OK");
+  //if (gsm.sendSMS(QUALIFIED_NUMBER, "Hi friend!"))
+    //Serial.println("\nSMS sent OK");
 }
 
 void loop() 
