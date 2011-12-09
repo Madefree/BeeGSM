@@ -89,10 +89,10 @@ int TeltonikaTM1Q::configandwait(char* pin)
   for(int i=0; i<10; i++)
   {  	
     //Ask for register status to GPRS network.
-    _cell << "AT+CGREG?" <<  _BYTE(cr) << endl; 
+    _cell << "AT+CREG?" <<  _BYTE(cr) << endl; 
 
     //Se espera la unsolicited response de registered to network.
-    while (_tf.find("+CGREG: 0,"))  // CHANGE!!!!
+    while (_tf.find("+CREG: 0,"))  // CHANGE!!!!
 	{
 		connCode=_tf.getValue();
 		if((connCode==1)||(connCode==5))
@@ -453,18 +453,21 @@ int TeltonikaTM1Q::read(char* result, int resultlength)
 boolean TeltonikaTM1Q::readSMS(char* msg, int msglength, char* number, int nlength)
 {
   long index;
+  char number_buff[20];
 
   if (getStatus()==IDLE)
     return false;
   
-  _tf.setTimeout(_GSM_DATA_TOUT_);
+  _tf.setTimeout(1);
   _cell.flush();
   _cell << "AT+CMGL=\"REC UNREAD\"" << endl;
   if(_tf.find("+CMGL: "))
   {
     index=_tf.getValue();
-    _tf.getString("\"+", "\"", number, nlength);
+    _tf.getString("\"+", "\"", number_buff, nlength);
     _tf.getString("\n", "\nOK", msg, msglength);
+    strcpy(number,"+");
+    strcat(number,number_buff);
     _cell << "AT+CMGD=" << index << endl;
     _tf.find("OK");
     return true;
@@ -480,15 +483,15 @@ boolean TeltonikaTM1Q::readCall(char* number, int nlength)
   if (getStatus()==IDLE)
     return false;
   
-  _tf.setTimeout(_GSM_DATA_TOUT_);
+  _tf.setTimeout(10);
 
   if(_tf.find("+CLIP: "))
   {
     _tf.getString("\"", "\",", number, nlength);
 		if(_tf.find("RING"))
-			_cell << "ATH" << endl;
-    delay(1000);
-    //_cell.flush();
+			_cell << "ATH\r";
+    delay(500);
+    _cell.flush();
     return true;
   };
   return false;
