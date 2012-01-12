@@ -1,14 +1,8 @@
 #include "TeltonikaTM1Q.h"
 #include <NewSoftSerial.h>
 
-/*
- * We should put here some copyright stuff.
- *
- * This program is developed just to test-develop the Arduino-TID-GSM libraries.
-*/
-
-char msg[200];
-int numdata;
+int milliseconds = 6000;
+char number[] = "0123456789";
 
 void setup() 
 {
@@ -16,24 +10,27 @@ void setup()
   Serial.begin(9600);
   Serial.println("BeeGSM testing.");
   //Start configuration.
+  gsm.debug(false);
   if (gsm.begin())
     Serial.println("\nstatus=READY");
   else Serial.println("\nstatus=IDLE");
   
-  if (gsm.sendSMS("1234567890", "Hi Guy!"))
-    Serial.println("\nSMS sent OK");
+  if (gsm.call(number, milliseconds)) {
+    Serial.print("\nCALL ");
+    Serial.println(number);
+  }
 
 };
 
 void loop() 
 {
-  char smsbuffer[160];
   char n[20];
 
-  if(gsm.readSMS(smsbuffer, 160, n, 20))
+  if(gsm.readCall(n, 20))
   {
+    Serial.println("Received call!");
+    Serial.print("Number: ");
     Serial.println(n);
-    Serial.println(smsbuffer);
   }
   delay(1000);
 };

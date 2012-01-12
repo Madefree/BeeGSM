@@ -297,13 +297,14 @@ int TeltonikaTM1Q::readAllPhoneBook(char* phonebook)
     strcat(phonebook, number);
     strcat(phonebook, ", text=");
     strcat(phonebook, text);
-    strcat(phonebook, "; ");
+    strcat(phonebook, ";\n");
   }
-  
-  if(_tf.find("OK"))
-    return 1;
-  else
+
+  //Expect "OK".
+  if(!_tf.find("OK"))
     return 0;
+  else  
+    return 1;
 }
 
 int TeltonikaTM1Q::readPhoneBook(int index, char* number, char* text)
