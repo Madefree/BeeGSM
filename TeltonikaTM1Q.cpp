@@ -367,6 +367,28 @@ int TeltonikaTM1Q::writePhoneBook(char* number, char* text)
   else
     return 0;
 }
+
+int TeltonikaTM1Q::getCCI(char *cci)
+{
+  //Status must be READY
+  if((getStatus() != READY))
+    return 2;
+
+  _tf.setTimeout(_GSM_DATA_TOUT_);  //Timeout for expecting modem responses. 	
+  _cell.flush();
+	
+  //AT command to get CCID.
+  _cell << "AT+CCID" << _BYTE(cr) << endl; // Establecemos el pin
+
+  //Read response from modem
+  _tf.getString("+CCID: ","\r\n",cci, 21);
+
+  //Expect "OK".
+  if(!_tf.find("OK"))
+    return 0;
+  else  
+    return 1;
+}
   
 int TeltonikaTM1Q::getIMEI(char *imei)
 {
@@ -376,10 +398,10 @@ int TeltonikaTM1Q::getIMEI(char *imei)
   _cell.flush();
 
   //AT command to get IMEI.
-  _cell << "AT+GSN" << _BYTE(cr) << endl; 
+  _cell << "AT+CGSN" << _BYTE(cr) << endl; 
   
   //Read response from modem
-  _tf.getString("AT+GSN\r\r\r\n","\r\n",imei, 15);
+    _tf.getString("\n","\n",imei, 16);
   
   //Expect "OK".
   if(!_tf.find("OK"))
