@@ -56,24 +56,12 @@ class GSM
     virtual int getIMEI(char* imei);
 
     virtual int sendSMS(const char* to, const char* msg);
-    virtual boolean availableSMS();
     virtual boolean readSMS(char* msg, int msglength, char* number, int nlength);
     virtual boolean readCall(char* number, int nlength);
     virtual boolean call(char* number, unsigned int milliseconds);
-    virtual int attachGPRS(char* domain, char* dom1, char* dom2);
-    virtual int dettachGPRS();
-    virtual int connectTCP(const char* server, int port);
-    virtual int disconnectTCP();
-    virtual int connectTCPServer(int port);
-    virtual boolean connectedClient();
     virtual int readCellData(int &mcc, int &mnc, long &lac, long &cellid);
-    virtual int write(uint8_t c);
-    virtual int write(const char* str);
-    virtual int write(const uint8_t* buffer, size_t sz);
-    virtual int read(char* result, int resultlength);
-	virtual uint8_t read();
-    
 
 };
 
 #endif
+

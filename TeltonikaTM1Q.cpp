@@ -165,65 +165,6 @@ int TeltonikaTM1Q::sendSMS(const char* to, const char* msg)
     return 1;
 }
 
-
-int TeltonikaTM1Q::write(const uint8_t* buffer, size_t sz)
-{
-  int resultlength;
-  char reslengthbuf[60];
-  
-  if((getStatus() != TCPCONNECTEDSERVER)&&(getStatus() != TCPCONNECTEDCLIENT))
-    return 0;
-    
-  if(sz>1460)
-    return 0;
-  
-  _tf.setTimeout(_GSM_DATA_TOUT_);
-
-  _cell.flush();
-  
-  //Connect the socket with handle 0 peer-to-peer to the remote end.
-  _cell << "AT+NSOWR=0," << sz <<  _BYTE(cr) << endl;
-  
-  //Write data to connected socket.
-  if(_tf.find("@"))
-  {
-    for(int i=0;i<sz;i++)
-      _cell << _BYTE(buffer[i]);
-  }
-  else
-    return 0;
-  
-  // Return result length.
-  if(_tf.find("OK"))
-  {
-    _tf.getString("+NUSORD: 0,","",reslengthbuf, 60);
-    resultlength = atoi(reslengthbuf);
-    return resultlength;
-  }
-  else
-    return 0;
-}
-
-
-int TeltonikaTM1Q::read(char* result, int resultlength)
-{
-
-  int charget;
-  
-  _tf.setTimeout(_GSM_DATA_TOUT_);
-  
-  //Read of data from socket.
-  _cell << "AT+NSORD=0," << resultlength <<  _BYTE(cr) << endl;
-  
-  _tf.getString("","",result, resultlength);
-  
-  
-  if(_tf.find("OK"))
-    return 1;
-  else
-    return 0;
-}
-
  int TeltonikaTM1Q::readCellData(int &mcc, int &mnc, long &lac, long &cellid)
 {
   if (getStatus()==IDLE)
@@ -293,34 +234,6 @@ boolean TeltonikaTM1Q::readCall(char* number, int nlength)
     return true;
   };
   return false;
-};
-
-
-int TeltonikaTM1Q::readCallListNumbers(char* numbersList[], int nlength)
-{
-  int index;
-  char number[50];
-  int value=-1;	 
-
-  if (getStatus()==IDLE)
-    return value;
-
-  _tf.setTimeout(_GSM_DATA_TOUT_);
-
-  if(_tf.find("+CLIP: \""))
-  {
-    _tf.getString("", "\"", number, 50);
-    _cell << "ATH" << endl;
-    delay(1000);
-    _cell.flush();
-    for (int i=0; i<nlength; i++) {
-      if(strcmp(numbersList[i],number)==0) {
-        value=i;
-        break;
-      }
-    }
-  };
-  return value;
 };
 
 boolean TeltonikaTM1Q::call(char* number, unsigned int milliseconds)
@@ -454,24 +367,6 @@ int TeltonikaTM1Q::writePhoneBook(char* number, char* text)
   else
     return 0;
 }
-
-int TeltonikaTM1Q::write(uint8_t c)
-{
-  if ((getStatus() == TCPCONNECTEDCLIENT) ||(getStatus() == TCPCONNECTEDSERVER) )
-    return write(&c, 1);
-  else
-    return 0;
-}
-
-int TeltonikaTM1Q::write(const char* str)
-{
-  if ((getStatus() == TCPCONNECTEDCLIENT) ||(getStatus() == TCPCONNECTEDSERVER) )
-      return write((const uint8_t*)str, strlen(str));
-  else
-      return 0;
-}
-
-
   
 int TeltonikaTM1Q::getIMEI(char *imei)
 {
@@ -493,7 +388,3 @@ int TeltonikaTM1Q::getIMEI(char *imei)
     return 1;
 }
 
-uint8_t TeltonikaTM1Q::read()
-{
-  return _cell.read();
-}
