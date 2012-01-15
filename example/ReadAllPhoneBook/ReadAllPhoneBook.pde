@@ -14,7 +14,8 @@ void setup()
     Serial.println("\nstatus=READY");
   else Serial.println("\nstatus=IDLE");
   //Read all phone book
-  gsm.readAllPhoneBook(phonebook);
+  Serial.print("Number of items: ");
+  Serial.println(gsm.readAllPhoneBook(phonebook));
   Serial.println(phonebook);
 }
 

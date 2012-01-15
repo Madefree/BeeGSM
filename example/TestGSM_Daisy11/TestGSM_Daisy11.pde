@@ -16,10 +16,11 @@ void setup()
   led.begin();
   Serial.println("GSM + Daisy11 test started");
   //Start configuration.
+  gsm.debug(false);
   if (gsm.begin())
     Serial.println("\nstatus=READY");
   else Serial.println("\nstatus=IDLE");
-  gsm.debug(true);
+  
   //if (gsm.sendSMS(QUALIFIED_NUMBER, "Hi friend!"))
     //Serial.println("\nSMS sent OK");
 }
