@@ -46,7 +46,7 @@ class TeltonikaTM1Q : public virtual GSM
     boolean call(char* number, unsigned int milliseconds);
     int readAllPhoneBook(char* phonebook);
     int readPhoneBook(int index, char* number, char* text);
-    int findPhoneBook(char* findtext, int index, char* number, char* text);
+    int findPhoneBook(char* findtext, int &index, char* number, char* text);
     int writePhoneBook(char* number, char* text);
     int readCellData(int &mcc, int &mnc, long &lac, long &cellid);
   

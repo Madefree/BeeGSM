@@ -326,7 +326,7 @@ int TeltonikaTM1Q::readPhoneBook(int index, char* number, char* text)
     return 0;
 }
 
-int TeltonikaTM1Q::findPhoneBook(char* findtext, int index, char* number, char* text)
+int TeltonikaTM1Q::findPhoneBook(char* findtext, int &index, char* number, char* text)
 {
   char indexbuf[20];
   
