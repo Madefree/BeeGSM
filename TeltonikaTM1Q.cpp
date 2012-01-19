@@ -292,17 +292,16 @@ int TeltonikaTM1Q::readAllPhoneBook(char* phonebook)
     _tf.getString("",",",index, 2);
     _tf.getString(",\"","\",",number, 20);
     _tf.getString(",\"","\"",text, 20);
-    strcat(phonebook, "index=");
     strcat(phonebook, index);
-    strcat(phonebook, ", number=");
+    strcat(phonebook, ",");
     strcat(phonebook, number);
-    strcat(phonebook, ", text=");
+    strcat(phonebook, ",");
     strcat(phonebook, text);
     strcat(phonebook, ";\n");
     blength++;
   }
 
-    return blength;
+  return blength;
 }
 
 int TeltonikaTM1Q::readPhoneBook(int index, char* number, char* text)
