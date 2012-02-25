@@ -271,38 +271,41 @@ int TeltonikaTM1Q::setPIN(char *pin)
     return 1;
 }
 
-int TeltonikaTM1Q::readAllPhoneBook(char* phonebook)
+boolean TeltonikaTM1Q::readCallAuthPhoneBook(char* number, int nlength,boolean &auth)
+
 {
-  char index[2];
-  char number[20];
-  char text[20];
-  int blength = 0;
-
-  if (getStatus()==IDLE)
-    return 0;
-  
-  _tf.setTimeout(_GSM_DATA_TOUT_);
-  _cell.flush();
-  
-  //Phonebook
-  _cell << "AT+CPBR=1,99" <<  _BYTE(cr) << endl;
-  
-  while(_tf.find("+CPBR: "))
-  {
-    _tf.getString("",",",index, 2);
-    _tf.getString(",\"","\",",number, 20);
-    _tf.getString(",\"","\"",text, 20);
-    strcat(phonebook, index);
-    strcat(phonebook, ",");
-    strcat(phonebook, number);
-    strcat(phonebook, ",");
-    strcat(phonebook, text);
-    strcat(phonebook, ";\n");
-    blength++;
-  }
-
-  return blength;
-}
+    char index[2];
+    char n[20];
+    char text[20];
+    
+    if (getStatus()==IDLE)
+        return false;
+    
+    _tf.setTimeout(10);
+    
+    if(_tf.find("+CLIP: "))
+    {
+        auth=false;
+        _tf.getString("\"", "\",", number, nlength);
+        if(_tf.find("RING"))
+            _cell << "ATH\r";
+        if(_tf.find("OK")) {
+            delay(300);
+            _cell << "AT+CPBR=1,99" << endl;
+            while(_tf.find("+CPBR: ")) {
+                _tf.getString("",",",index, 2);
+                _tf.getString(",\"","\",",n, 20);
+                _tf.getString(",\"","\"",text, 20);
+                if(strcmp(number,n)==0) {
+                    auth=true;
+                    return true;
+                }
+            }
+        }
+        return true;
+    }
+    return false;
+};
 
 int TeltonikaTM1Q::readPhoneBook(int index, char* number, char* text)
 {
@@ -407,4 +410,6 @@ int TeltonikaTM1Q::getIMEI(char *imei)
   else  
     return 1;
 }
+
+
 
