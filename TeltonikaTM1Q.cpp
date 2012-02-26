@@ -307,6 +307,47 @@ boolean TeltonikaTM1Q::readCallAuthPhoneBook(char* number, int nlength,boolean &
     return false;
 };
 
+boolean TeltonikaTM1Q::readSMSAuthPhoneBook(char* msg, int msglength, char* number, int nlength,boolean &auth)
+{
+    long index;
+    char number_buff[20];
+    char _index[2];
+    char n[20];
+    char text[20];
+    
+    if (getStatus()==IDLE)
+        return false;
+    
+    _tf.setTimeout(1);
+    _cell.flush();
+    _cell << "AT+CMGL=\"REC UNREAD\"" << endl;
+    if(_tf.find("+CMGL: "))
+    {
+        auth=true;
+        index=_tf.getValue();
+        _tf.getString("\"+", "\"", number_buff, nlength);
+        _tf.getString("\n", "\nOK", msg, msglength);
+        strcpy(number,"+");
+        strcat(number,number_buff);
+        _cell << "AT+CMGD=" << index << endl;
+        if(_tf.find("OK")) {
+            delay(300);
+            _cell << "AT+CPBR=1,99" << endl;
+            while(_tf.find("+CPBR: ")) {
+                _tf.getString("",",",_index, 2);
+                _tf.getString(",\"","\",",n, 20);
+                _tf.getString(",\"","\"",text, 20);
+                if(strcmp(number,n)==0) {
+                    auth=true;
+                    return true;
+                }
+            }
+        }
+        return true;
+    }
+    return false;
+};
+
 int TeltonikaTM1Q::readPhoneBook(int index, char* number, char* text)
 {
   if (getStatus()==IDLE)
