@@ -47,9 +47,15 @@
 
   // constructors 
   //default timeout is 5 seconds
+
+#if defined(ARDUINO) && ARDUINO >= 100
   
-  WideTextFinder::WideTextFinder(NewSoftSerial &stream, int timeout) :
+  WideTextFinder::WideTextFinder(SoftwareSerial &stream, int timeout) :
                   nSerialStream(&stream) 
+#else
+  WideTextFinder::WideTextFinder(NewSoftSerial &stream, int timeout) :
+                  nSerialStream(&stream)
+#endif
   { 
     this->timeout = timeout * 1000L;     
 	debug=true;

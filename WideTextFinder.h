@@ -22,14 +22,23 @@
 #ifndef WideTextFinder_h
 #define WideTextFinder_h
 
-#include <WProgram.h>
+#if defined(ARDUINO) && ARDUINO >= 100
+#include "Arduino.h"
+#include <SoftwareSerial.h>
+#else
+#include "WProgram.h"
 #include <NewSoftSerial.h>
+#endif
 
 
 class WideTextFinder {
 private:
-  NewSoftSerial* nSerialStream;
 
+#if defined(ARDUINO) && ARDUINO >= 100
+  SoftwareSerial* nSerialStream;
+#else
+  NewSoftSerial* nSerialStream;
+#endif
   unsigned long timeout;    // number of seconds to wait for the next char before aborting read
   unsigned long startMillis; // used for timeout measurement
   boolean debug;
@@ -38,8 +47,12 @@ private:
 
 public:
   // constructor: 
-  // default timeout is 5 seconds
+  // default timeout is 5 seconds 
+#if defined(ARDUINO) && ARDUINO >= 100    
+  WideTextFinder(SoftwareSerial &stream, int timeout = 5);          // Ethernet constructor
+#else
   WideTextFinder(NewSoftSerial &stream, int timeout = 5);          // Ethernet constructor
+#endif
   
   // Manage debug
   void setDebug(boolean d);

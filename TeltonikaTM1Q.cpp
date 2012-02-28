@@ -89,7 +89,7 @@ int TeltonikaTM1Q::configandwait(char* pin)
   for(int i=0; i<10; i++)
   {  	
     //Ask for register status to GPRS network.
-    _cell << "AT+CREG?" <<  _BYTE(cr) << endl; 
+    _cell << "AT+CREG?" << endl; 
 
     //Se espera la unsolicited response de registered to network.
     while (_tf.find("+CREG: 0,"))  // CHANGE!!!!
@@ -99,10 +99,10 @@ int TeltonikaTM1Q::configandwait(char* pin)
 		{
 		  setStatus(READY);
 		  
-		_cell << "AT+CMGF=1" <<  _BYTE(cr) << endl; //SMS text mode.
+		_cell << "AT+CMGF=1" << endl; //SMS text mode.
 		delay(400);
 		  // Buah, we should take this to readCall()
-		_cell << "AT+CLIP=1" <<  _BYTE(cr) << endl; //SMS text mode.
+		_cell << "AT+CLIP=1" << endl; //SMS text mode.
 		delay(400);
 		//_cell << "AT+CGACT=0" <<  _BYTE(cr) << endl; //PDP context deactivate to make sure not pending connection.
 		//delay(1000);
@@ -126,7 +126,7 @@ int TeltonikaTM1Q::shutdown()
 
   _tf.setTimeout(_TCP_CONNECTION_TOUT_);
   _cell.flush();
-  _cell << "AT+CPWROFF" <<  _BYTE(cr) << endl; //Comprobar
+  _cell << "AT+CPWROFF" << endl; //Comprobar
    if (_tf.find("OK")) 
    {
      setStatus(IDLE);
@@ -150,13 +150,13 @@ int TeltonikaTM1Q::sendSMS(const char* to, const char* msg)
   _cell.flush();
 
   //AT command to send a SMS. Destination telephone number 
-  _cell << "AT+CMGS=\"" << to << "\"" <<  _BYTE(cr) << endl; // Establecemos el destinatario
+  _cell << "AT+CMGS=\"" << to << "\"" << endl; // Establecemos el destinatario
 
   //Expect for ">" character.
   if(!_tf.find(">")) return 0;
 
   //SMS text.
-  _cell << msg << _BYTE(ctrlz);
+  _cell << msg << '\x1a';
 
   //Expect "OK".
   if(!_tf.find("OK"))
@@ -262,7 +262,7 @@ int TeltonikaTM1Q::setPIN(char *pin)
   _cell.flush();
 
   //AT command to set PIN.
-  _cell << "AT+CPIN=\"" << pin << "\"" <<  _BYTE(cr) << endl; // Establecemos el pin
+  _cell << "AT+CPIN=\"" << pin << "\"" << endl; // Establecemos el pin
 
   //Expect "OK".
   if(!_tf.find("OK"))
@@ -357,7 +357,7 @@ int TeltonikaTM1Q::readPhoneBook(int index, char* number, char* text)
   _cell.flush();
   
   //Phonebook
-  _cell << "AT+CPBR=" << index << "," << index <<  _BYTE(cr) << endl;
+  _cell << "AT+CPBR=" << index << "," << index << endl;
   
   if(_tf.find("+CPBR: "))
   {
@@ -380,7 +380,7 @@ int TeltonikaTM1Q::findPhoneBook(char* findtext, int &index, char* number, char*
   _tf.setTimeout(_GSM_DATA_TOUT_);
   _cell.flush();
   
-  _cell << "AT+CPBF=\"" << findtext << "\"" <<  _BYTE(cr) << endl;
+  _cell << "AT+CPBF=\"" << findtext << "\"" << endl;
   
   if(_tf.find("+CPBF: "))
   {
@@ -402,7 +402,7 @@ int TeltonikaTM1Q::writePhoneBook(char* number, char* text)
   _tf.setTimeout(_GSM_DATA_TOUT_);
   _cell.flush();
   
-  _cell << "AT+CPBW=,\"" << number << "\",,\"" << text << "\"" <<  _BYTE(cr) << endl;
+  _cell << "AT+CPBW=,\"" << number << "\",,\"" << text << "\"" << endl;
   
   if(_tf.find("OK"))
     return 1;
@@ -420,7 +420,7 @@ int TeltonikaTM1Q::getCCI(char *cci)
   _cell.flush();
 	
   //AT command to get CCID.
-  _cell << "AT+CCID" << _BYTE(cr) << endl; // Establecemos el pin
+  _cell << "AT+CCID" << endl; // Establecemos el pin
 
   //Read response from modem
   _tf.getString("+CCID: ","\r\n",cci, 21);
@@ -440,7 +440,7 @@ int TeltonikaTM1Q::getIMEI(char *imei)
   _cell.flush();
 
   //AT command to get IMEI.
-  _cell << "AT+CGSN" << _BYTE(cr) << endl; 
+  _cell << "AT+CGSN" << endl; 
   
   //Read response from modem
     _tf.getString("\n","\n",imei, 16);

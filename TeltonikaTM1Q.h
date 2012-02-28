@@ -21,7 +21,13 @@
 
 #ifndef TELTONIKATM1Q_H
 #define TELTONIKATM1Q_H
+
+#if defined(ARDUINO) && ARDUINO >= 100
+#include <SoftwareSerial.h>
+#else
 #include <NewSoftSerial.h>
+#endif
+
 #include "GSM.h"
 
 class TeltonikaTM1Q : public virtual GSM

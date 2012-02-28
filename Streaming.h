@@ -20,7 +20,11 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef ARDUINO_STREAMING
 #define ARDUINO_STREAMING
 
+#if defined(ARDUINO) && ARDUINO >= 100
+#include <Arduino.h>
+#else
 #include <WProgram.h>
+#endif
 #include "LOG.h"
 
 #define __ST_LOG_LEVEL 3

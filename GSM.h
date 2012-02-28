@@ -22,7 +22,11 @@
 #ifndef GSM_H
 #define GSM_H
 
+#if defined(ARDUINO) && ARDUINO >= 100
+#include <SoftwareSerial.h>
+#else
 #include <NewSoftSerial.h>
+#endif
 #include <inttypes.h>
 #include "WideTextFinder.h"
 
@@ -39,7 +43,11 @@ class GSM
     int _status;
     
   protected:
+#if defined(ARDUINO) && ARDUINO >= 100
+    SoftwareSerial _cell;
+#else
     NewSoftSerial _cell;
+#endif
     WideTextFinder _tf;
     inline void setStatus(GSM_st_e status) { _status = status; }
     virtual int setPIN(char *pin);
